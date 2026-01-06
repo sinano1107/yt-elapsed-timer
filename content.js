@@ -74,8 +74,42 @@
     value.dataset.timerValue = "1";
     value.textContent = "00:00:00";
 
+    const actions = document.createElement("div");
+    actions.style.display = "flex";
+    actions.style.justifyContent = "flex-end";
+    actions.style.marginTop = "6px";
+
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.dataset.timerReset = "1";
+    resetButton.textContent = "リセット";
+    resetButton.style.fontSize = "11px";
+    resetButton.style.lineHeight = "1";
+    resetButton.style.padding = "4px 6px";
+    resetButton.style.borderRadius = "6px";
+    resetButton.style.border = "1px solid rgba(255,255,255,0.35)";
+    resetButton.style.background = "rgba(255,255,255,0.12)";
+    resetButton.style.color = "#fff";
+    resetButton.style.cursor = "pointer";
+    resetButton.style.userSelect = "none";
+    resetButton.style.transition = "background 150ms ease";
+
+    resetButton.addEventListener("mouseenter", () => {
+      resetButton.style.background = "rgba(255,255,255,0.22)";
+    });
+    resetButton.addEventListener("mouseleave", () => {
+      resetButton.style.background = "rgba(255,255,255,0.12)";
+    });
+    resetButton.addEventListener("mousedown", (e) => {
+      // ドラッグ開始を防ぐ
+      e.stopPropagation();
+    });
+
+    actions.appendChild(resetButton);
+
     el.appendChild(label);
     el.appendChild(value);
+    el.appendChild(actions);
 
     document.documentElement.appendChild(el);
     return el;
@@ -129,9 +163,17 @@
   }
 
   function startTicker() {
-    const startMs = ensureStartMs();
+    let startMs = ensureStartMs();
     const overlay = createOverlay();
     const valueEl = overlay.querySelector('[data-timer-value="1"]');
+    const resetButton = overlay.querySelector('[data-timer-reset="1"]');
+
+    if (resetButton) {
+      resetButton.addEventListener("click", () => {
+        startMs = now();
+        sessionStorage.setItem(STORAGE_KEY, String(startMs));
+      });
+    }
 
     const tick = () => {
       const elapsed = now() - startMs;
